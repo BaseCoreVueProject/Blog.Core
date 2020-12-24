@@ -1,8 +1,12 @@
 ﻿using RabbitMQ.Client;
 using System;
 
-namespace Blog.Core.Extensions.RabbitMQPersistent
+namespace Blog.Core.EventBus
 {
+    /// <summary>
+    /// RabbitMQ持久连接
+    /// 接口
+    /// </summary>
     public interface IRabbitMQPersistentConnection
         : IDisposable
     {

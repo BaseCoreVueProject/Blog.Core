@@ -1,4 +1,6 @@
 ﻿using Autofac;
+using Blog.Core.Common.Extensions;
+using Blog.Core.Common.Helper;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -8,30 +10,43 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blog.Core.Extensions.RabbitMQPersistent
+namespace Blog.Core.EventBus
 {
+    /// <summary>
+    /// 基于RabbitMQ的事件总线
+    /// </summary>
     public class EventBusRabbitMQ : IEventBus, IDisposable
     {
-        const string BROKER_NAME = "eshop_event_bus";
+        const string BROKER_NAME = "blogcore_event_bus";
 
         private readonly IRabbitMQPersistentConnection _persistentConnection;
         private readonly ILogger<EventBusRabbitMQ> _logger;
         private readonly IEventBusSubscriptionsManager _subsManager;
         private readonly ILifetimeScope _autofac;
-        private readonly string AUTOFAC_SCOPE_NAME = "eshop_event_bus";
+        private readonly string AUTOFAC_SCOPE_NAME = "blogcore_event_bus";
         private readonly int _retryCount;
 
         private IModel _consumerChannel;
         private string _queueName;
 
+        /// <summary>
+        /// RabbitMQ事件总线
+        /// </summary>
+        /// <param name="persistentConnection">RabbitMQ持久连接</param>
+        /// <param name="logger">日志</param>
+        /// <param name="autofac">autofac容器</param>
+        /// <param name="subsManager">事件总线订阅管理器</param>
+        /// <param name="queueName">队列名称</param>
+        /// <param name="retryCount">重试次数</param>
         public EventBusRabbitMQ(IRabbitMQPersistentConnection persistentConnection, ILogger<EventBusRabbitMQ> logger,
-            ILifetimeScope autofac, IEventBusSubscriptionsManager subsManager, string queueName = null, int retryCount = 5)
+            ILifetimeScope autofac, 
+            IEventBusSubscriptionsManager subsManager, 
+            string queueName = null, 
+            int retryCount = 5)
         {
             _persistentConnection = persistentConnection ?? throw new ArgumentNullException(nameof(persistentConnection));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -43,6 +58,11 @@ namespace Blog.Core.Extensions.RabbitMQPersistent
             _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
         }
 
+        /// <summary>
+        /// 订阅管理器事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventName"></param>
         private void SubsManager_OnEventRemoved(object sender, string eventName)
         {
             if (!_persistentConnection.IsConnected)
@@ -64,6 +84,10 @@ namespace Blog.Core.Extensions.RabbitMQPersistent
             }
         }
 
+        /// <summary>
+        /// 发布
+        /// </summary>
+        /// <param name="event">事件模型</param>
         public void Publish(IntegrationEvent @event)
         {
             if (!_persistentConnection.IsConnected)
@@ -109,6 +133,12 @@ namespace Blog.Core.Extensions.RabbitMQPersistent
             }
         }
 
+        /// <summary>
+        /// 订阅
+        /// 动态
+        /// </summary>
+        /// <typeparam name="TH">事件处理器</typeparam>
+        /// <param name="eventName">事件名</param>
         public void SubscribeDynamic<TH>(string eventName)
             where TH : IDynamicIntegrationEventHandler
         {
@@ -119,6 +149,11 @@ namespace Blog.Core.Extensions.RabbitMQPersistent
             StartBasicConsume();
         }
 
+        /// <summary>
+        /// 订阅
+        /// </summary>
+        /// <typeparam name="T">约束：事件模型</typeparam>
+        /// <typeparam name="TH">约束：事件处理器<事件模型></typeparam>
         public void Subscribe<T, TH>()
             where T : IntegrationEvent
             where TH : IIntegrationEventHandler<T>
@@ -127,6 +162,8 @@ namespace Blog.Core.Extensions.RabbitMQPersistent
             DoInternalSubscription(eventName);
 
             _logger.LogInformation("Subscribing to event {EventName} with {EventHandler}", eventName, typeof(TH).GetGenericTypeName());
+
+            ConsoleHelper.WriteSuccessLine($"Subscribing to event {eventName} with {typeof(TH).GetGenericTypeName()}");
 
             _subsManager.AddSubscription<T, TH>();
             StartBasicConsume();
@@ -151,6 +188,11 @@ namespace Blog.Core.Extensions.RabbitMQPersistent
             }
         }
 
+        /// <summary>
+        /// 取消订阅
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TH"></typeparam>
         public void Unsubscribe<T, TH>()
             where T : IntegrationEvent
             where TH : IIntegrationEventHandler<T>
@@ -178,6 +220,9 @@ namespace Blog.Core.Extensions.RabbitMQPersistent
             _subsManager.Clear();
         }
 
+        /// <summary>
+        /// 开始基本消费
+        /// </summary>
         private void StartBasicConsume()
         {
             _logger.LogTrace("Starting RabbitMQ basic consume");
@@ -199,6 +244,12 @@ namespace Blog.Core.Extensions.RabbitMQPersistent
             }
         }
 
+        /// <summary>
+        /// 消费者接受到
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        /// <returns></returns>
         private async Task Consumer_Received(object sender, BasicDeliverEventArgs eventArgs)
         {
             var eventName = eventArgs.RoutingKey;
@@ -224,6 +275,10 @@ namespace Blog.Core.Extensions.RabbitMQPersistent
             _consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
         }
 
+        /// <summary>
+        /// 创造消费通道
+        /// </summary>
+        /// <returns></returns>
         private IModel CreateConsumerChannel()
         {
             if (!_persistentConnection.IsConnected)
