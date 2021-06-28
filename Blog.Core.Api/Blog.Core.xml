@@ -9,12 +9,12 @@
             博客管理
             </summary>
         </member>
-        <member name="M:Blog.Core.Controllers.BlogController.#ctor(Blog.Core.IServices.IBlogArticleServices,Microsoft.Extensions.Logging.ILogger{Blog.Core.Controllers.BlogController})">
+        <member name="M:Blog.Core.Controllers.BlogController.#ctor(Microsoft.Extensions.Logging.ILogger{Blog.Core.Controllers.BlogController})">
             <summary>
             构造函数
             </summary>
-            <param name="blogArticleServices"></param>
             <param name="logger"></param>
+            
         </member>
         <member name="M:Blog.Core.Controllers.BlogController.Get(System.Int32,System.Int32,System.String,System.String)">
             <summary>
@@ -88,14 +88,29 @@
         </member>
         <member name="M:Blog.Core.Controllers.DbFirstController.GetFrameFiles">
             <summary>
-            获取 整体框架 文件
+            获取 整体框架 文件(主库)(一般可用第一次生成)
             </summary>
             <returns></returns>
         </member>
         <member name="M:Blog.Core.Controllers.DbFirstController.GetFrameFilesByTableNames(System.String[],System.String)">
             <summary>
-            根据数据库表名 生成整体框架
-            仅针对通过CodeFirst生成表的情况
+            获取仓储层和服务层(需指定表名和数据库)
+            </summary>
+            <param name="ConnID">数据库链接名称</param>
+            <param name="tableNames">需要生成的表名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Controllers.DbFirstController.GetFrameFilesByTableNamesForEntity(System.String[],System.String)">
+            <summary>
+            获取实体(需指定表名和数据库)
+            </summary>
+            <param name="ConnID">数据库链接名称</param>
+            <param name="tableNames">需要生成的表名</param>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Controllers.DbFirstController.GetFrameFilesByTableNamesForController(System.String[],System.String)">
+            <summary>
+            获取控制器(需指定表名和数据库)
             </summary>
             <param name="ConnID">数据库链接名称</param>
             <param name="tableNames">需要生成的表名</param>
@@ -103,7 +118,7 @@
         </member>
         <member name="M:Blog.Core.Controllers.DbFirstController.GetAllFrameFilesByTableNames(System.String[],System.String)">
             <summary>
-            DbFrist 根据数据库表名 生成整体框架,包含Model层
+            DbFrist 根据数据库表名 生成整体框架,包含Model层(一般可用第一次生成)
             </summary>
             <param name="ConnID">数据库链接名称</param>
             <param name="tableNames">需要生成的表名</param>
@@ -263,6 +278,60 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="T:Blog.Core.Controllers.PayController">
+            <summary>
+            建行聚合支付类
+            </summary>
+        </member>
+        <member name="M:Blog.Core.Controllers.PayController.#ctor(Microsoft.Extensions.Logging.ILogger{Blog.Core.Controllers.PayController},Blog.Core.IServices.IPayServices)">
+            <summary>
+            构造函数
+            </summary> 
+            <param name="logger"></param>
+            <param name="payServices"></param>
+        </member>
+        <member name="M:Blog.Core.Controllers.PayController.PayGet(Blog.Core.Model.ViewModels.PayNeedModel)">
+            <summary>
+            被扫支付
+            </summary>
+            <param name="payModel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Controllers.PayController.PayPost(Blog.Core.Model.ViewModels.PayNeedModel)">
+            <summary>
+            被扫支付
+            </summary>
+            <param name="payModel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Controllers.PayController.PayCheckGet(Blog.Core.Model.ViewModels.PayNeedModel)">
+            <summary>
+            支付结果查询-轮询
+            </summary>
+            <param name="payModel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Controllers.PayController.PayCheckPost(Blog.Core.Model.ViewModels.PayNeedModel)">
+            <summary>
+            支付结果查询-轮询
+            </summary>
+            <param name="payModel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Controllers.PayController.PayRefundGet(Blog.Core.Model.ViewModels.PayRefundNeedModel)">
+            <summary>
+            退款
+            </summary>
+            <param name="payModel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Controllers.PayController.PayRefundPost(Blog.Core.Model.ViewModels.PayRefundNeedModel)">
+            <summary>
+            退款
+            </summary>
+            <param name="payModel"></param>
+            <returns></returns>
+        </member>
         <member name="T:Blog.Core.Controllers.PermissionController">
             <summary>
             菜单管理
@@ -402,6 +471,13 @@
             <param name="tasksQz"></param>
             <returns></returns>
         </member>
+        <member name="M:Blog.Core.Controllers.TasksQzController.Delete(System.Int32)">
+            <summary>
+            删除一个任务
+            </summary>
+            <param name="jobId"></param>
+            <returns></returns>
+        </member>
         <member name="M:Blog.Core.Controllers.TasksQzController.StartJob(System.Int32)">
             <summary>
             启动计划任务
@@ -416,9 +492,36 @@
             <param name="jobId"></param>
             <returns></returns>        
         </member>
+        <member name="M:Blog.Core.Controllers.TasksQzController.PauseJob(System.Int32)">
+            <summary>
+            暂停一个计划任务
+            </summary>
+            <param name="jobId"></param>
+            <returns></returns>        
+        </member>
+        <member name="M:Blog.Core.Controllers.TasksQzController.ResumeJob(System.Int32)">
+            <summary>
+            恢复一个计划任务
+            </summary>
+            <param name="jobId"></param>
+            <returns></returns>        
+        </member>
         <member name="M:Blog.Core.Controllers.TasksQzController.ReCovery(System.Int32)">
             <summary>
             重启一个计划任务
+            </summary>
+            <param name="jobId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Controllers.TasksQzController.GetTaskNameSpace">
+            <summary>
+            获取任务命名空间
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Controllers.TasksQzController.ExecuteJob(System.Int32)">
+            <summary>
+            立即执行任务
             </summary>
             <param name="jobId"></param>
             <returns></returns>
@@ -612,7 +715,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Blog.Core.Controllers.ValuesController.RedisMq(Blog.Core.Common.IRedisBasketRepository)">
+        <member name="M:Blog.Core.Controllers.ValuesController.RedisMq(Blog.Core.Extensions.IRedisBasketRepository)">
             <summary>
             测试Redis消息队列
             </summary>

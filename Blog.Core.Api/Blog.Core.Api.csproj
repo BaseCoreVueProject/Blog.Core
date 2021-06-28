@@ -8,6 +8,7 @@
 		<!--<AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>-->
 		<AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -44,6 +45,8 @@
 	<ItemGroup>
 	
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
+	
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

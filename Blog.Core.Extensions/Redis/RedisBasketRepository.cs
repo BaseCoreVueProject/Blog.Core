@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Blog.Core.Common;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
@@ -6,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Blog.Core.Common
+namespace Blog.Core.Extensions
 {
     public class RedisBasketRepository : IRedisBasketRepository
     {
@@ -153,7 +154,6 @@ namespace Blog.Core.Common
         /// <summary>
         /// 移除并返回存储在该键列表的第一个元素   
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="redisKey"></param>
         /// <param name="db"></param>
         /// <returns></returns>
