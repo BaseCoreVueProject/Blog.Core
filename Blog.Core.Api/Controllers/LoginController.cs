@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+ 
 
 namespace Blog.Core.Controllers
 {
@@ -23,7 +24,7 @@ namespace Blog.Core.Controllers
     [Produces("application/json")]
     [Route("api/Login")]
     [AllowAnonymous]
-    public class LoginController : BaseApiCpntroller
+    public class LoginController : BaseApiController
     {
         readonly ISysUserInfoServices _sysUserInfoServices;
         readonly IUserRoleServices _userRoleServices;
@@ -61,10 +62,11 @@ namespace Blog.Core.Controllers
         [Route("Token")]
         public async Task<MessageModel<string>> GetJwtStr(string name, string pass)
         {
+            
             string jwtStr = string.Empty;
             bool suc = false;
             //这里就是用户登陆以后，通过数据库去调取数据，分配权限的操作
-
+          
             var user = await _sysUserInfoServices.GetUserRoleNameStr(name, MD5Helper.MD5Encrypt32(pass));
             if (user != null)
             {
@@ -202,7 +204,7 @@ namespace Blog.Core.Controllers
             if (string.IsNullOrEmpty(token))
                 return Failed<TokenInfoViewModel>("token无效，请重新登录！");
             var tokenModel = JwtHelper.SerializeJwt(token);
-            if (tokenModel != null && tokenModel.Uid > 0)
+            if (tokenModel != null && JwtHelper.customSafeVerify(token) && tokenModel.Uid > 0)
             {
                 var user = await _sysUserInfoServices.QueryById(tokenModel.Uid);
                 if (user != null)
@@ -264,5 +266,30 @@ namespace Blog.Core.Controllers
         {
             return MD5Helper.MD5Encrypt32(password);
         }
+
+        /// <summary>
+        /// swagger登录
+        /// </summary>
+        /// <param name="loginRequest"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("swgLogin")]
+        public dynamic SwgLogin([FromBody] SwaggerLoginRequest loginRequest)
+        {
+            // 这里可以查询数据库等各种校验
+            if (loginRequest?.name == "admin" && loginRequest?.pwd == "admin")
+            {
+                HttpContext.Session.SetString("swagger-code", "success");
+                return new { result = true };
+            }
+
+            return new { result = false };
+        }
+    }
+
+    public class SwaggerLoginRequest
+    {
+        public string name { get; set; }
+        public string pwd { get; set; }
     }
 }

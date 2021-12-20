@@ -3,7 +3,6 @@ using Blog.Core.Common.DB;
 using Blog.Core.IRepository.Base;
 using Blog.Core.IRepository.UnitOfWork;
 using Blog.Core.Model;
-using Blog.Core.Model.Models;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ namespace Blog.Core.Repository.Base
     public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class, new()
     {
         private readonly IUnitOfWork _unitOfWork;
-        private SqlSugarClient _dbBase;
+        private SqlSugarScope _dbBase;
 
         private ISqlSugarClient _db
         {
